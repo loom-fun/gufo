@@ -273,12 +273,10 @@ bool InferenceBackend::load(
     const PrepareRunnerOptions& prepare_runner_options) {
   std::shared_ptr<const core::GgufReader> reader;
   const ext::TextProvider* provider = nullptr;
-  std::error_code directory_error;
-  if (std::filesystem::is_directory(model_path, directory_error)) {
+  if (ext::ProbeModelDirectory(model_path, &provider)) {
     // A model directory, such as a package with its own manifest, belongs to
     // the provider whose `probe` claims it; there is no GGUF to read.
-    provider = ext::ProbeTextProvider(std::string_view(model_path));
-    if (provider == nullptr || provider->create == nullptr) {
+    if (provider == nullptr) {
       SetError(error, "No text provider claims model directory " + model_path);
       return false;
     }

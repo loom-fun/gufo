@@ -17,12 +17,14 @@
   # The embedding library's sources: a directory with `CMakeLists.txt`,
   # added to Loom's serve tree.
   embed,
+  # Also build loom-serve and loom-fetch (for side-by-side comparisons);
+  # the extension needs only the library.
+  withTools ? false,
 }:
 
 let
   # hrx-system v0.1.0, the release of hrx-loom 0.1.0.
   revision = "d01d1c18b154189fd073777329052d23f6071f14";
-  withLoom = true;
 
   src = fetchFromGitHub {
     owner = "ROCm";
@@ -98,7 +100,7 @@ llvm.rocmClangStdenv.mkDerivation {
     "-DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld"
     "-DCMAKE_MODULE_LINKER_FLAGS=-fuse-ld=lld"
   ]
-  ++ lib.optionals withLoom [
+  ++ [
     "-DLOOM_TARGET_ALL_AMD=ON"
     "-DLOOM_ARCH_AMDGPU_TARGETS=gfx1151"
     "-DLOOM_IMPORT_CXX=ON"
@@ -107,7 +109,9 @@ llvm.rocmClangStdenv.mkDerivation {
   ninjaFlags = [
     "loom/src/loom/serve/embed/libloom_text_embed.so"
   ]
-  ++ map (tool: "loom/src/loom/tools/${tool}/${tool}") loomTools;
+  ++ lib.optionals withTools (
+    map (tool: "loom/src/loom/tools/${tool}/${tool}") loomTools
+  );
 
   installPhase = ''
     runHook preInstall
@@ -124,7 +128,7 @@ llvm.rocmClangStdenv.mkDerivation {
     Cflags: -I$out/include
     EOF
   ''
-  + lib.optionalString withLoom ''
+  + lib.optionalString withTools ''
     for tool in ${lib.concatStringsSep " " loomTools}; do
       install -Dm755 loom/src/loom/tools/$tool/$tool $out/bin/$tool
     done

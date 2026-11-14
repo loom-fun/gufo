@@ -403,11 +403,10 @@ int RunPrompt(std::span<const char* const> args) {
   }
 
   const auto model_load_start = std::chrono::steady_clock::now();
-  std::error_code directory_error;
-  if (std::filesystem::is_directory(opt.model_path, directory_error)) {
-    // A model directory belongs to the provider whose probe claims it.
-    const auto* provider = ext::ProbeTextProvider(opt.model_path);
-    if (provider == nullptr || provider->create == nullptr) {
+  // A model directory belongs to the provider whose probe claims it.
+  if (const ext::TextProvider* provider = nullptr;
+      ext::ProbeModelDirectory(opt.model_path, &provider)) {
+    if (provider == nullptr) {
       std::cerr << "Error: no text provider claims model directory '"
                 << opt.model_path << "'\n";
       return 1;
@@ -482,11 +481,10 @@ int RunChat(std::span<const char* const> args) {
   }
 
   const auto model_load_start = std::chrono::steady_clock::now();
-  std::error_code directory_error;
-  if (std::filesystem::is_directory(opt.model_path, directory_error)) {
-    // A model directory belongs to the provider whose probe claims it.
-    const auto* provider = ext::ProbeTextProvider(opt.model_path);
-    if (provider == nullptr || provider->create == nullptr) {
+  // A model directory belongs to the provider whose probe claims it.
+  if (const ext::TextProvider* provider = nullptr;
+      ext::ProbeModelDirectory(opt.model_path, &provider)) {
+    if (provider == nullptr) {
       std::cerr << "Error: no text provider claims model directory '"
                 << opt.model_path << "'\n";
       return 1;

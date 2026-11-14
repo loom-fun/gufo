@@ -773,7 +773,8 @@
             hrx = self.packages.${system}.hrx;
           };
           # Loom 0.1.0's text model layer behind a C API for the loom
-          # extension; override `embed` with the extension's loom-embed dir.
+          # extension; override `embed` with the extension's loom-embed dir
+          # (and `withTools = true` for loom-serve and loom-fetch too).
           loom-runtime = pkgs.${system}.callPackage ./.devops/nix/loom {
             rocmPackages = pkgs.${system}.rocmPackages.gfx1151;
             embed = null;
