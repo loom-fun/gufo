@@ -772,6 +772,13 @@
             gufo = base;
             hrx = self.packages.${system}.hrx;
           };
+          # Loom 0.1.0's text model layer behind a C API for the loom
+          # extension; override `embed` with the extension's loom-embed dir
+          # (and `withTools = true` for loom-serve and loom-fetch too).
+          loom-runtime = pkgs.${system}.callPackage ./.devops/nix/loom {
+            rocmPackages = pkgs.${system}.rocmPackages.gfx1151;
+            embed = null;
+          };
           # XRT with its amdxdna plugin, as the Gufo package links it.
           xrt-amdxdna = gufoPackages.${system}.xrt-amdxdna;
           iron = gufoPackages.${system}.iron;
