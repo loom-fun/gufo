@@ -20,6 +20,9 @@
   # Also build loom-serve and loom-fetch (for side-by-side comparisons);
   # the extension needs only the library.
   withTools ? false,
+  # GPU targets the library carries device code for. gfx1151 is Strix Halo;
+  # add gfx1201 for the Radeon AI PRO R9700 (one library serves both).
+  gpuTargets ? [ "gfx1151" ],
 }:
 
 let
@@ -90,7 +93,7 @@ llvm.rocmClangStdenv.mkDerivation {
     # Loom's static libraries link into the shared embedding library.
     "-DCMAKE_POSITION_INDEPENDENT_CODE=ON"
     "-DIREE_ROCM_DEPENDENCY_MODE=pinned"
-    "-DIREE_HAL_AMDGPU_TARGETS=gfx1151"
+    "-DIREE_HAL_AMDGPU_TARGETS=${lib.concatStringsSep ";" gpuTargets}"
     "-DIREE_HAL_AMDGPU_DEVICE_TOOLCHAIN=llvm-tools"
     "-DIREE_HAL_AMDGPU_DEVICE_TOOLCHAIN_LLVM_TOOLS_DIR=${llvm.clang}/bin"
     "-DIREE_HAL_AMDGPU_DEVICE_TOOLCHAIN_ROCM_DEVICE_LIB_PATH=${rocmPackages.rocm-device-libs}/amdgcn/bitcode"
@@ -102,7 +105,7 @@ llvm.rocmClangStdenv.mkDerivation {
   ]
   ++ [
     "-DLOOM_TARGET_ALL_AMD=ON"
-    "-DLOOM_ARCH_AMDGPU_TARGETS=gfx1151"
+    "-DLOOM_ARCH_AMDGPU_TARGETS=${lib.concatStringsSep ";" gpuTargets}"
     "-DLOOM_IMPORT_CXX=ON"
   ];
 
